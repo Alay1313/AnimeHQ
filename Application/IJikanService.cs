@@ -1,0 +1,148 @@
+using System;
+using System.Text.Json.Serialization;
+using JikanDotNet;
+
+
+namespace Application;
+
+public interface IJikanService
+{
+    Task<JikanAnimeResponse?> GetAnimeAsync(int malId);
+    Task<IEnumerable<JikanAnimeData>> SearchAnimeAsync(string query, int page = 1);
+    
+    Task<JikanEpisodeResponse?> GetEpisodesAsync(int malId, int page = 1);
+
+
+}
+
+
+
+
+public class JikanAnimeResponse
+{
+    public AnimeDto? Data { get; set; }
+}
+
+    public class JikanSearchItem
+{
+    public int MalId { get; set; }
+    public string? Title { get; set; }
+     public JikanImages? Images { get; set; }
+}
+
+
+public class JikanEpisodeResponse
+ { 
+ public List<JikanEpisodeData> Data { get; set; } = new();  
+ public JikanPagination? Pagination { get; set; }
+  }
+
+
+
+
+public class JikanEpisodeData
+{
+public int MalId { get; set; } 
+ public int EpisodeNumber { get; set; } 
+ public string? Title { get; set; }
+public string? TitleJapanese { get; set; } 
+ public DateTime? Aired { get; set; } 
+ public string? Synopsis { get; set; } 
+ public string? Duration { get; set; }
+}
+
+
+public class JikanPagination 
+{ 
+    public bool HasNextPage { get; set; }
+
+}
+
+
+
+
+    public class JikanSearchResponse
+{
+    [JsonPropertyName("data")]
+    public List<JikanAnimeData> Data { get; set; } = [];
+}
+
+
+
+public class JikanImageSet
+{
+    [JsonPropertyName("image_url")]
+    public string? ImageUrl { get; set; }
+
+    [JsonPropertyName("small_image_url")]
+    public string? SmallImageUrl { get; set; }
+
+    [JsonPropertyName("large_image_url")]
+    public string? LargeImageUrl { get; set; }
+}
+
+public class JikanImages
+{
+
+     [JsonPropertyName("jpg")]
+    public JikanImageSet? Jpg { get; set; }
+
+    [JsonPropertyName("webp")]
+    public JikanImageSet? Webp { get; set; }
+}
+    
+
+   
+
+    public class JikanGenre 
+    { 
+    public int MalId { get; set; } 
+    public required string Name { get; set; } 
+     
+    }
+
+
+    public class JikanDateRange
+    { 
+        public DateTime? From { get; set; }
+        public DateTime? To { get; set; }
+    }
+
+
+
+   public class JikanAnimeData
+{
+    [JsonPropertyName("mal_id")]
+    public int MalId { get; set; }
+
+    [JsonPropertyName("title")]
+    public string? Title { get; set; }
+
+    [JsonPropertyName("images")]
+
+    public JikanImages? Images { get; set; }
+
+    [JsonPropertyName("score")]
+    public float? Score { get; set; }
+
+    [JsonPropertyName("synopsis")]
+    public string? Synopsis { get; set; }
+
+    [JsonPropertyName("type")]
+    public string? Type { get; set; }
+
+    [JsonPropertyName("episodes")]
+    public int? Episodes { get; set; }
+
+     [JsonPropertyName("status")]
+    public string? Status { get; set; }
+    public JikanDateRange? Aired { get; set; }
+
+    public List<JikanGenre> Genres { get; set; } = [];
+}
+
+
+   
+
+
+

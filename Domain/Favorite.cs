@@ -12,6 +12,10 @@ public class Favorite
     public required User User { get; set;}
     public required Anime Anime { get; set; } 
 
+    public required Genre Genre { get; set;}
+
+    public DateTime CreatedAt { get; set; }
+
    
 
     
