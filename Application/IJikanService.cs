@@ -12,7 +12,27 @@ public interface IJikanService
     
     Task<JikanEpisodeResponse?> GetEpisodesAsync(int malId, int page = 1);
 
+    Task<IEnumerable<JikanAnimeData>> GetTopAiringAsync(int page = 1, int pageSize = 25, string? type = null, CancellationToken ct = default);
 
+    Task<IEnumerable<JikanAnimeData>> GetPopularAsync(int page = 1, int pageSize = 25, string? type = null,  CancellationToken ct = default);
+
+
+    Task<IEnumerable<JikanAnimeData>> GetSeasonalAsync(int page = 1, int pageSize = 25, string? type = null, CancellationToken ct = default);
+
+    Task<IEnumerable<JikanAnimeData>> GetUpcomingAsync(int page = 1, int pageSize = 25, string? type = null, CancellationToken ct = default);
+
+
+}
+
+
+
+
+
+
+public class JikanApiResponse<T>
+{
+    public List<T> Data { get; set; } = new();
+    public Pagination Pagination { get; set; } = new();
 }
 
 
@@ -20,7 +40,7 @@ public interface IJikanService
 
 public class JikanAnimeResponse
 {
-    public AnimeDto? Data { get; set; }
+    public JikanAnimeData? Data { get; set; }
 }
 
     public class JikanSearchItem

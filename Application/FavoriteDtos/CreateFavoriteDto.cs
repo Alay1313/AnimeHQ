@@ -1,12 +1,12 @@
 using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace Application;
 
 public class CreateFavoriteDto 
 { 
-    public string UserId { get; set; } = "guest"; 
-    public int AnimeId { get; set; } 
-    public int GenreId { get; set; } 
+    [Required] public string UserId { get; set; } = string.Empty; 
+    [Required] public int AnimeId { get; set; } 
     
     
 }

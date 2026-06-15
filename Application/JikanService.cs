@@ -2,10 +2,11 @@
 
 using Microsoft.Extensions.Logging;
 using System.Net.Http.Json;
-using Microsoft.EntityFrameworkCore;
+//using Microsoft.EntityFrameworkCore;
 using Polly.Retry;
 using Polly;
 using System.Net;
+using System.Text.Json;
 
 
 
@@ -41,15 +42,38 @@ public class JikanService: IJikanService
 
     public async Task<JikanAnimeResponse?> GetAnimeAsync(int malId)
     {
+
+
         try
-        {
-            return await _httpClient.GetFromJsonAsync<JikanAnimeResponse>($"anime/{malId}");
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to fetch anime {MalId} from Jikan", malId);
-            return null;
-        }
+    {
+        var response = await _retryPolicy.ExecuteAsync(() => 
+            _httpClient.GetAsync($"anime/{malId}"));
+
+        response.EnsureSuccessStatusCode();
+
+        var result = await response.Content.ReadFromJsonAsync<JikanAnimeResponse>(
+            new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+        // Temporary: log what we actually got back
+        _logger.LogInformation("Jikan GetAnime {MalId}: data null={IsNull}", 
+            malId, result?.Data == null);
+
+        return result;
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "Failed to fetch anime {MalId} from Jikan", malId);
+        return null;
+    }
+        // try
+        // {
+        //     return await _httpClient.GetFromJsonAsync<JikanAnimeResponse>($"anime/{malId}");
+        // }
+        // catch (Exception ex)
+        // {
+        //     _logger.LogError(ex, "Failed to fetch anime {MalId} from Jikan", malId);
+        //     return null;
+        // }
     }
 
     
@@ -60,15 +84,26 @@ public class JikanService: IJikanService
 
     public async Task<IEnumerable<JikanAnimeData>> SearchAnimeAsync(string query, int page = 1)
 {
-    var escaped = Uri.EscapeDataString(query);
+    
+    var url = $"anime?q={Uri.EscapeDataString(query)}&page={page}&limit=20";
+    var response = await FetchJikanDataAsync<JikanApiResponse<JikanAnimeData>>(url, default);
+    return response?.Data ?? Enumerable.Empty<JikanAnimeData>();
+    
+    
+    
+    
+    
+    
+    
+    // var escaped = Uri.EscapeDataString(query);
 
-    var response = await _httpClient.GetFromJsonAsync<JikanSearchResponse>(
-        $"anime?q={escaped}&page={page}&limit=20"
-    );
+    // var response = await _httpClient.GetFromJsonAsync<JikanSearchResponse>(
+    //     $"anime?q={escaped}&page={page}&limit=20"
+    // );
 
-    Console.WriteLine("DEBUG COUNT: " + response?.Data?.Count);
+    // Console.WriteLine("DEBUG COUNT: " + response?.Data?.Count);
 
-    return response?.Data ?? new List<JikanAnimeData>();
+    // return response?.Data ?? new List<JikanAnimeData>();
 }
 
 
@@ -76,17 +111,91 @@ public class JikanService: IJikanService
 
     public async Task<JikanEpisodeResponse?> GetEpisodesAsync(int malId, int page = 1)
     {
-        try
-        {
-            return await _httpClient.GetFromJsonAsync<JikanEpisodeResponse>($"anime/{malId}/episodes?page={page}");
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to fetch episodes for anime {MalId} from Jikan", malId);
-            return null;
-        }
+        
+        return await FetchJikanDataAsync<JikanEpisodeResponse>($"anime/{malId}/episodes?page={page}", default);
+        
+        
+        
+        // try
+        // {
+        //     return await _httpClient.GetFromJsonAsync<JikanEpisodeResponse>($"anime/{malId}/episodes?page={page}");
+        // }
+        // catch (Exception ex)
+        // {
+        //     _logger.LogError(ex, "Failed to fetch episodes for anime {MalId} from Jikan", malId);
+        //     return null;
+        // }
     }
 
+
+
+   public async Task<IEnumerable<JikanAnimeData>> GetTopAiringAsync(int page = 1, int pageSize = 25, string? type = null, CancellationToken ct = default)
+    {
+        var url = $"top/anime?filter=airing&page={page}&limit={pageSize}";
+        if (!string.IsNullOrWhiteSpace(type) && !type.Equals("all", StringComparison.OrdinalIgnoreCase))
+            url += $"&type={type.ToLower()}";
+        
+        var response = await FetchJikanDataAsync<JikanApiResponse<JikanAnimeData>>(url, ct);
+        return response?.Data ?? Enumerable.Empty<JikanAnimeData>();
+    }
+
+
+
+   public async Task<IEnumerable<JikanAnimeData>> GetPopularAsync(int page = 1, int pageSize = 25, string? type = null, CancellationToken ct = default)
+   {
+        var url = $"top/anime?filter=bypopularity&page={page}&limit={pageSize}";
+        if (!string.IsNullOrWhiteSpace(type) && !type.Equals("all", StringComparison.OrdinalIgnoreCase))
+            url += $"&type={type.ToLower()}";
+        
+        var response = await FetchJikanDataAsync<JikanApiResponse<JikanAnimeData>>(url, ct);
+        return response?.Data ?? Enumerable.Empty<JikanAnimeData>();
+   }
+
+
+
+
+
+   public async Task<IEnumerable<JikanAnimeData>> GetSeasonalAsync(int page = 1, int pageSize = 25, string? type = null, CancellationToken ct = default)
+   {
+        var url = $"seasons/now?page={page}&limit={pageSize}";
+        if (!string.IsNullOrWhiteSpace(type) && !type.Equals("all", StringComparison.OrdinalIgnoreCase))
+            url += $"&type={type.ToLower()}";
+        
+        var response = await FetchJikanDataAsync<JikanApiResponse<JikanAnimeData>>(url, ct);
+        return response?.Data ?? Enumerable.Empty<JikanAnimeData>();
+   }
+
+
+
+    public async Task<IEnumerable<JikanAnimeData>> GetUpcomingAsync(int page = 1, int pageSize = 25, string? type = null, CancellationToken ct = default)
+    {
+        
+         var url = $"seasons/upcoming?page={page}&limit={pageSize}";
+         if (!string.IsNullOrWhiteSpace(type) && !type.Equals("all", StringComparison.OrdinalIgnoreCase))
+                url += $"&type={type.ToLower()}";
+
+        var response = await FetchJikanDataAsync<JikanApiResponse<JikanAnimeData>>(url, ct);
+        return response?.Data ?? Enumerable.Empty<JikanAnimeData>();
+        
+        
+        
+    }
+
+
+
+    private async Task<T?> FetchJikanDataAsync<T>(string url, CancellationToken ct)
+    {
+        var response = await _retryPolicy.ExecuteAsync(ct2 => 
+        _httpClient.GetAsync(url, ct2), ct);
+    
+        response.EnsureSuccessStatusCode();
+
+        return await response.Content.ReadFromJsonAsync<T>(
+        new JsonSerializerOptions { PropertyNameCaseInsensitive = true },
+        cancellationToken: ct);
+        
+        
+    }
 
 
 

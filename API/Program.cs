@@ -1,10 +1,10 @@
 using Application;
-using Application.AnimeDtos;
-using Application.Genredtos;
-using Application.Rev;
-using Application.UserDtos;
+using Microsoft.AspNetCore.Identity;
+using Domain;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -25,9 +25,10 @@ builder.Services.AddHttpClient<IJikanService, JikanService>(client =>
 
 
 builder.Services.AddCors(options => options.AddPolicy("AllowFrontend", 
-    policy => policy.WithOrigins("http://127.0.0.1:5500").AllowAnyHeader().AllowAnyMethod().AllowCredentials()
+    policy => policy.WithOrigins("http://localhost:5173").AllowAnyHeader().AllowAnyMethod().AllowCredentials()
 
 ));
+
 
 builder.Services.AddScoped<IAnimeRepo, AnimeRepo>();
 builder.Services.AddScoped<IEpisodeRepo, EpisodeRepo>();
@@ -35,15 +36,41 @@ builder.Services.AddScoped<IFavoriteRepo, FavoriteRepo>();
 builder.Services.AddScoped<IReviewRepo, ReviewRepo>();
 builder.Services.AddScoped<IUserRepo, UserRepo>();
 builder.Services.AddScoped<IGenreRepo, GenreRepo>();
-//builder.Services.AddScoped<IJikanService, JikanService>();
 
 
-builder.Services.AddScoped<AnimeService>();
-builder.Services.AddScoped<EpisodeService>();
-builder.Services.AddScoped<FavoriteService>();
-builder.Services.AddScoped<ReviewService>();
-builder.Services.AddScoped<UserService>();
-builder.Services.AddScoped<GenreService>();
+
+builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
+builder.Services.AddScoped<ITokenService, TokenService>();
+
+builder.Services.AddScoped<IAnimeService, AnimeService>();
+builder.Services.AddScoped<IEpisodeService, EpisodeService>();
+builder.Services.AddScoped<IFavoriteService, FavoriteService>();
+builder.Services.AddScoped<IReviewService, ReviewService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IGenreService, GenreService>();
+
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
+        ValidAudience = builder.Configuration["JwtSettings:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:SecretKey"]))
+    };
+});
+
+builder.Services.AddAuthorization();
+
 
 
 builder.Services.AddControllers();
@@ -71,7 +98,7 @@ app.UseDefaultFiles();
 app.UseStaticFiles(); 
 
 app.UseResponseCaching();
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 
 

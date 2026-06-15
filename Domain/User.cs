@@ -10,13 +10,15 @@ namespace Domain;
 public class User
 {
     [Key, MaxLength(450)]
-    public string Id { get; set; }  = Guid.NewGuid().ToString();
+    public string Id { get; set; }  = string.Empty;
 
     [Required, MaxLength(100)]
-    public required string UserName { get; set; }
+    public required string UserName { get; set; } = string.Empty;
 
     [Required, MaxLength(250)]
-    public required string Email { get; set; }
+    public required string Email { get; set; } = string.Empty;
+
+    public string PasswordHash { get; set; } = string.Empty; 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public ICollection<Favorite> Favorites { get; set; } = new List<Favorite>();

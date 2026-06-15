@@ -1,70 +1,61 @@
-using System;
 using AutoMapper;
-using Persistence;
 using Domain;
+using Persistence;
 
-namespace Application.Rev;
+namespace Application;
 
-public class ReviewService
+public class ReviewService : IReviewService
 {
     private readonly IReviewRepo _repo;
     private readonly IMapper _mapper;
 
-      public ReviewService(IReviewRepo repo, IMapper mapper)
+    public ReviewService(IReviewRepo repo, IMapper mapper)
     {
         _repo = repo;
         _mapper = mapper;
     }
 
-
-    public async Task<ReviewDto?> GetByIdAsync(int id)
+    public async Task<ReviewDto?> GetByIdAsync(int id, CancellationToken ct = default)
     {
-        var review = await _repo.GetByIdAsync(id);
+        var review = await _repo.GetByIdAsync(id, ct);
         return review == null ? null : _mapper.Map<ReviewDto>(review);
     }
 
-
-    public async Task<IEnumerable<ReviewDto>> GetByAnimeIdAsync(int animeId)
+    public async Task<IEnumerable<ReviewDto>> GetByAnimeIdAsync(int animeId, CancellationToken ct = default)
     {
-        var reviews = await _repo.GetByAnimeIdAsync(animeId);
+        var reviews = await _repo.GetByAnimeIdAsync(animeId, ct);
         return _mapper.Map<IEnumerable<ReviewDto>>(reviews);
     }
 
-
-    public async Task<IEnumerable<ReviewDto>> GetByUserIdAsync(string userId)
+    public async Task<IEnumerable<ReviewDto>> GetByUserIdAsync(string userId, CancellationToken ct = default)
     {
-        var reviews = await _repo.GetByUserIdAsync(userId);
+        var reviews = await _repo.GetByUserIdAsync(userId, ct);
         return _mapper.Map<IEnumerable<ReviewDto>>(reviews);
     }
 
-
-    public async Task<ReviewDto?> CreateAsync(CreateReviewDto dto)
+    public async Task<ReviewDto?> CreateAsync(CreateReviewDto dto, CancellationToken ct = default)
     {
         var entity = _mapper.Map<Review>(dto);
         entity.CreatedAt = DateTime.UtcNow;
-        var created = await _repo.CreateAsync(entity);
+        
+        var created = await _repo.CreateAsync(entity, ct);
         return _mapper.Map<ReviewDto>(created);
     }
 
-
-    public async Task<ReviewDto?> UpdateAsync(int id, ReviewDto dto)
+    public async Task<ReviewDto?> UpdateAsync(int id, UpdateReviewDto dto, CancellationToken ct = default)
     {
-        var existing = await _repo.GetByIdAsync(id);
+        var existing = await _repo.GetByIdAsync(id, ct);
         if (existing == null) return null;
 
-        existing.Content = dto.Content;
-        existing.Rating = dto.Rating;
-        existing.UserId = dto.UserId ?? string.Empty;
-        existing.AnimeId = dto.AnimeId;
-
-        var updated = await _repo.UpdateAsync(id, existing);
+        // Use AutoMapper to update only the allowed fields (Content, Rating)
+        _mapper.Map(dto, existing);
+        
+        var updated = await _repo.UpdateAsync(id, existing, ct);
         return updated == null ? null : _mapper.Map<ReviewDto>(updated);
     }
 
-    public async Task<bool> DeleteAsync(int id)
+    public async Task<bool> DeleteAsync(int id, CancellationToken ct = default)
     {
-        return await _repo.DeleteAsync(id);
-        
+        return await _repo.DeleteAsync(id, ct);
     }
-
 }

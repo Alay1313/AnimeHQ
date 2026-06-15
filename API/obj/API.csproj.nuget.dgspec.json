@@ -28,6 +28,12 @@
             "projectReferences": {
               "C:\\Dev\\AnimeHQ\\Application\\Application.csproj": {
                 "projectPath": "C:\\Dev\\AnimeHQ\\Application\\Application.csproj"
+              },
+              "C:\\Dev\\AnimeHQ\\Domain\\Domain.csproj": {
+                "projectPath": "C:\\Dev\\AnimeHQ\\Domain\\Domain.csproj"
+              },
+              "C:\\Dev\\AnimeHQ\\Persistence\\Persistence.csproj": {
+                "projectPath": "C:\\Dev\\AnimeHQ\\Persistence\\Persistence.csproj"
               }
             }
           }
@@ -76,17 +82,25 @@
               "target": "Package",
               "version": "[8.0.0-alpha.1, )"
             },
+            "Microsoft.AspNetCore.Authentication.JwtBearer": {
+              "target": "Package",
+              "version": "[10.0.9, )"
+            },
             "Microsoft.AspNetCore.OpenApi": {
               "target": "Package",
               "version": "[10.0.6, )"
             },
             "Microsoft.EntityFrameworkCore.Design": {
               "target": "Package",
-              "version": "[10.0.8, )"
+              "version": "[10.0.9, )"
             },
             "Microsoft.EntityFrameworkCore.Tools": {
               "target": "Package",
-              "version": "[10.0.8, )"
+              "version": "[10.0.9, )"
+            },
+            "Microsoft.Owin.Security.Authorization.Mvc": {
+              "target": "Package",
+              "version": "[1.2.2.4, )"
             },
             "Serilog.AspNetCore": {
               "target": "Package",
@@ -103,6 +117,10 @@
             "Swashbuckle.AspNetCore": {
               "target": "Package",
               "version": "[10.1.7, )"
+            },
+            "System.IdentityModel.Tokens.Jwt": {
+              "target": "Package",
+              "version": "[8.19.1, )"
             }
           },
           "imports": [
@@ -566,9 +584,6 @@
             "projectReferences": {
               "C:\\Dev\\AnimeHQ\\Domain\\Domain.csproj": {
                 "projectPath": "C:\\Dev\\AnimeHQ\\Domain\\Domain.csproj"
-              },
-              "C:\\Dev\\AnimeHQ\\Persistence\\Persistence.csproj": {
-                "projectPath": "C:\\Dev\\AnimeHQ\\Persistence\\Persistence.csproj"
               }
             }
           }
@@ -592,6 +607,26 @@
             "AutoMapper": {
               "target": "Package",
               "version": "[12.0.1, )"
+            },
+            "JikanDotNet": {
+              "target": "Package",
+              "version": "[2.10.4, )"
+            },
+            "Microsoft.Extensions.Identity.Core": {
+              "target": "Package",
+              "version": "[10.0.9, )"
+            },
+            "Microsoft.Extensions.Logging.Abstractions": {
+              "target": "Package",
+              "version": "[10.0.9, )"
+            },
+            "Polly": {
+              "target": "Package",
+              "version": "[8.7.0, )"
+            },
+            "System.IdentityModel.Tokens.Jwt": {
+              "target": "Package",
+              "version": "[8.19.1, )"
             }
           },
           "imports": [
@@ -1243,6 +1278,9 @@
           "net10.0": {
             "targetAlias": "net10.0",
             "projectReferences": {
+              "C:\\Dev\\AnimeHQ\\Application\\Application.csproj": {
+                "projectPath": "C:\\Dev\\AnimeHQ\\Application\\Application.csproj"
+              },
               "C:\\Dev\\AnimeHQ\\Domain\\Domain.csproj": {
                 "projectPath": "C:\\Dev\\AnimeHQ\\Domain\\Domain.csproj"
               }
@@ -1269,13 +1307,21 @@
               "target": "Package",
               "version": "[2.10.4, )"
             },
+            "Microsoft.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[10.0.9, )"
+            },
+            "Microsoft.EntityFrameworkCore.Design": {
+              "target": "Package",
+              "version": "[10.0.9, )"
+            },
             "Microsoft.EntityFrameworkCore.SqlServer": {
               "target": "Package",
-              "version": "[10.0.8, )"
+              "version": "[10.0.9, )"
             },
             "Polly": {
               "target": "Package",
-              "version": "[8.6.6, )"
+              "version": "[8.7.0, )"
             }
           },
           "imports": [

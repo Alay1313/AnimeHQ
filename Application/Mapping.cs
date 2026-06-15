@@ -10,7 +10,19 @@ public class Mapping : Profile
 
         CreateMap<JikanAnimeData, AnimeDto>()
             .ForMember(dest => dest.AnimeListId, opt => opt.MapFrom(src => src.MalId))
-            .ForMember(dest => dest.ImageURL, opt => opt.MapFrom(src => src.Images.Jpg.ImageUrl ?? string.Empty))
+            .ForMember(dest => dest.ImageURL, opt => opt.MapFrom(src => src.Images.Jpg.LargeImageUrl ?? src.Images.Jpg.ImageUrl))
+            .ForMember(dest => dest.Score, opt => opt.MapFrom(src => src.Score ?? 0))
+            .ForMember(dest => dest.Synopsis, opt => opt.MapFrom(src => src.Synopsis ?? string.Empty))
+            .ForMember(dest => dest.Type, opt => opt.MapFrom(src => src.Type ?? "Unknown"))
+            .ForMember(dest => dest.Episodes, opt => opt.MapFrom(src => src.Episodes ?? 0))
+            .ForMember(dest => dest.AiredFrom, opt => opt.MapFrom(src => src.Aired.From))
+            .ForMember(dest => dest.AiredTo, opt => opt.MapFrom(src => src.Aired.To))
+            .ForMember(dest => dest.GenreIds, opt => opt.MapFrom(src => src.Genres.Select(g => g.MalId)));
+
+
+        CreateMap<JikanAnimeData, UpdateAnimeDto>()
+            .ForMember(dest => dest.AnimeListId, opt => opt.MapFrom(src => src.MalId))
+            .ForMember(dest => dest.ImageURL, opt => opt.MapFrom(src => src.Images.Jpg.LargeImageUrl ?? src.Images.Jpg.ImageUrl))
             .ForMember(dest => dest.Score, opt => opt.MapFrom(src => src.Score ?? 0))
             .ForMember(dest => dest.Synopsis, opt => opt.MapFrom(src => src.Synopsis ?? string.Empty))
             .ForMember(dest => dest.Type, opt => opt.MapFrom(src => src.Type ?? "Unknown"))
@@ -23,7 +35,28 @@ public class Mapping : Profile
 
         CreateMap<Anime, AnimeDto>()
             .ForMember(dest => dest.GenreIds, opt => opt.MapFrom(src => src.AnimeGenres.Select(ag => ag.GenreId)))
-            .ForMember(dest => dest.AnimeGenres, opt => opt.MapFrom(src => src.AnimeGenres)); 
+            .ForMember(dest => dest.AnimeGenres, opt => opt.MapFrom(src => src.AnimeGenres));
+
+
+         CreateMap<AnimeDto, UpdateAnimeDto>();
+
+
+
+
+         CreateMap<UpdateAnimeDto, CreateAnimeDto>();
+
+         CreateMap<AnimeDto, CreateAnimeDto>();
+
+         CreateMap<CreateAnimeDto, Anime>()
+        .ForMember(dest => dest.CachedAt, opt => opt.MapFrom(_ => DateTime.UtcNow))
+        .ForMember(dest => dest.AnimeGenres, opt => opt.Ignore());
+
+
+
+        CreateMap<UpdateAnimeDto, Anime>()
+            .ForMember(dest => dest.AnimeListId, opt => opt.Ignore()) 
+            .ForMember(dest => dest.CachedAt, opt => opt.MapFrom(_ => DateTime.UtcNow))
+            .ForMember(dest => dest.AnimeGenres, opt => opt.Ignore()); // Crucial for your manual foreach loop 
 
 
 
@@ -44,10 +77,28 @@ public class Mapping : Profile
             .ForMember(dest => dest.Favorites, opt => opt.Ignore());
 
 
+        CreateMap<RegisterDto, User>()
+        .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.Username))
+        .ForMember(dest => dest.PasswordHash, opt => opt.Ignore())
+        .ForMember(dest => dest.Id, opt => opt.Ignore())
+        .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+        .ForMember(dest => dest.Reviews, opt => opt.Ignore())
+        .ForMember(dest => dest.Favorites, opt => opt.Ignore());
+
+
 
         CreateMap<Review, ReviewDto>()
             .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User == null ? null : src.User.UserName))
             .ForMember(dest => dest.AnimeTitle, opt => opt.MapFrom(src => src.Anime == null ? null : src.Anime.Title));
+
+
+
+        
+        CreateMap<UpdateReviewDto, Review>()
+            .ForMember(dest => dest.ReviewId, opt => opt.Ignore())
+            .ForMember(dest => dest.UserId, opt => opt.Ignore())
+            .ForMember(dest => dest.AnimeId, opt => opt.Ignore())
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore());
 
 
 
@@ -59,16 +110,15 @@ public class Mapping : Profile
 
 
 
+            // Entity to DTO
         CreateMap<Favorite, FavoriteDto>()
-            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User == null ? null : src.User.UserName))
-            .ForMember(dest => dest.AnimeTitle, opt => opt.MapFrom(src => src.Anime == null ? null : src.Anime.Title));
+            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User != null ? src.User.UserName : null))
+            .ForMember(dest => dest.AnimeTitle, opt => opt.MapFrom(src => src.Anime != null ? src.Anime.Title : null));
 
-
-
-
+        // Create DTO to Entity
         CreateMap<CreateFavoriteDto, Favorite>()
             .ForMember(dest => dest.Id, opt => opt.Ignore())
-            .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(_ => DateTime.UtcNow)) 
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore()) // Handled in Service
             .ForMember(dest => dest.User, opt => opt.Ignore())
             .ForMember(dest => dest.Anime, opt => opt.Ignore());
 
@@ -77,7 +127,7 @@ public class Mapping : Profile
         CreateMap<Genre, GenreDto>()
             .ForMember(dest => dest.AnimeCount, opt => opt.MapFrom(src => src.AnimeGenres == null ? 0 : src.AnimeGenres.Count));
 
-        CreateMap<GenreDto, Genre>()
+        CreateMap<CreateGenreDto, Genre>()
             .ForMember(dest => dest.Id, opt => opt.Ignore())
             .ForMember(dest => dest.AnimeGenres, opt => opt.Ignore());
 

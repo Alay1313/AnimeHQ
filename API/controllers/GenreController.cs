@@ -1,63 +1,55 @@
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Application;
-using AutoMapper;
-using Domain;
-namespace API.controllers;
+
+
+namespace API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
 public class GenreController : ControllerBase
 {
-    private readonly IGenreRepo _repo;
-    private readonly IMapper _mapper;
-    public GenreController(IGenreRepo repo, IMapper mapper)
+    private readonly IGenreService _genreService;
+
+    public GenreController(IGenreService genreService)
     {
-        _repo = repo;
-        _mapper = mapper;
+        _genreService = genreService;
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(int id)
+    public async Task<IActionResult> GetById(int id, CancellationToken ct = default)
     {
-         var genre = await _repo.GetByIdAsync(id);
-         return genre == null ? NotFound() : Ok(_mapper.Map<GenreDto>(genre));
+        var genre = await _genreService.GetByIdAsync(id, ct);
+        return genre == null ? NotFound() : Ok(genre);
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll(CancellationToken ct = default)
     {
-        return Ok(await _repo.GetAllAsync());
-    } 
-
-  [HttpPost]
-    public async Task<IActionResult> Create([FromBody] GenreDto dto)
-    {
-        if (dto == null || string.IsNullOrWhiteSpace(dto.Name)) return BadRequest();
-        var genre = _mapper.Map<Genre>(dto);
-        var created = await _repo.CreateAsync(genre);
-        return CreatedAtAction(nameof(GetById), new { id = created.Id }, _mapper.Map<GenreDto>(created));
+        var genres = await _genreService.GetAllAsync(ct);
+        return Ok(genres);
     }
 
- 
+    [HttpPost]
+    public async Task<IActionResult> Create([FromBody] CreateGenreDto dto, CancellationToken ct = default)
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+
+        var created = await _genreService.CreateAsync(dto, ct);
+        
+        if (created == null)
+        {
+            return Conflict("A genre with this name already exists.");
+        }
+
+        return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+    }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(int id)
+    public async Task<IActionResult> Delete(int id, CancellationToken ct = default)
     {
-      
-        var success = await _repo.DeleteAsync(id);
-        if (success)
-        {
-            return NoContent();
-        }
-        else
-        {
-            return NotFound();
-        }
-
-    }  
-
-
+        var success = await _genreService.DeleteAsync(id, ct);
+        return success ? NoContent() : NotFound();
+    }
 }
 
 
