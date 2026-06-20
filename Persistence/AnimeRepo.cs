@@ -26,14 +26,28 @@ public class AnimeRepo : IAnimeRepo
             .FirstOrDefaultAsync(a => a.AnimeListId == animeListId, ct);
     }
 
-    public async Task<IEnumerable<Anime>> SearchAsync(string query, int page, int pageSize, CancellationToken ct = default)
+    public async Task<IEnumerable<Anime>> SearchAsync(string query, int page, int pageSize, List<int>? genreIds = null, CancellationToken ct = default)
     {
         var skip = (page - 1) * pageSize;
-        var lowerQuery = query.ToLower();
 
-        return await _context.Animes
-            .Include(a => a.AnimeGenres) // Required for AutoMapper to map GenreIds
-            .Where(a => a.Title.ToLower().Contains(lowerQuery))
+        var queryable = _context.Animes
+            .Include(a => a.AnimeGenres)
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(query))
+        {
+            var lowerQuery = query.ToLower();
+            queryable = queryable.Where(a => a.Title.ToLower().Contains(lowerQuery));
+        }
+
+        // Filter by genre — anime must match AT LEAST ONE selected genre
+        if (genreIds != null && genreIds.Count > 0)
+        {
+            queryable = queryable.Where(a =>
+            a.AnimeGenres.Any(ag => genreIds.Contains(ag.GenreId)));
+        }
+
+        return await queryable
             .OrderBy(a => a.Title)
             .Skip(skip)
             .Take(pageSize)
@@ -51,13 +65,25 @@ public class AnimeRepo : IAnimeRepo
 
     public async Task<Anime> UpdateAsync(int animeListId, Anime anime, CancellationToken ct = default)
     {
-        // EF Core will track this entity and update its scalar properties.
-        // Because we clear and rebuild the AnimeGenres collection in the Service layer, 
-        // EF Core will automatically handle the INSERTs/DELETEs for the join table.
-        _context.Animes.Update(anime);
+        var existing = await _context.Animes
+            .Include(a => a.AnimeGenres)
+            .FirstOrDefaultAsync(a => a.AnimeListId == animeListId, ct);
+    
+        if (existing == null) return anime;
+
+        existing.Title = anime.Title;
+        existing.ImageURL = anime.ImageURL;
+        existing.Score = anime.Score;
+        existing.Synopsis = anime.Synopsis;
+        existing.Type = anime.Type;
+        existing.Episodes = anime.Episodes;
+        existing.Status = anime.Status;
+        existing.AiredFrom = anime.AiredFrom;
+        existing.AiredTo = anime.AiredTo;
+        existing.CachedAt = anime.CachedAt;
+
         await _context.SaveChangesAsync(ct);
-        
-        return await GetByIdAsync(animeListId, ct) ?? anime;
+        return await GetByIdAsync(animeListId, ct) ?? existing;
     }
 
     public async Task<bool> DeleteAsync(int animeListId, CancellationToken ct = default)

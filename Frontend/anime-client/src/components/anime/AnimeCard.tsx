@@ -24,7 +24,7 @@ export function AnimeCard({ anime }: AnimeCardProps) {
   return (
     <Card className="group overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 bg-card border-muted h-full flex flex-col">
       
-      {/* Image Container - aspect-[3/4] is the perfect ratio for anime posters */}
+      {/* Image Container*/}
       <div className="relative aspect-[3/4] overflow-hidden bg-muted">
         <img 
           src={imageUrl} 
@@ -45,7 +45,7 @@ export function AnimeCard({ anime }: AnimeCardProps) {
         )}
       </div>
 
-      {/* Title Section - Slightly larger text for bigger cards */}
+      {/* Title Section*/}
       <CardHeader className="p-5 pb-3 flex-grow">
         <CardTitle 
           className="text-lg font-bold line-clamp-2 leading-snug text-foreground group-hover:text-primary transition-colors" 

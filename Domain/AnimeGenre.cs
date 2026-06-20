@@ -14,7 +14,7 @@ public class AnimeGenre
     [Column(Order = 2)]
     public int GenreId { get; set; }
 
-    // Navigation properties (marked as nullable to match your other entities)
+    
     public Anime? Anime { get; set; } 
     public Genre? Genre { get; set; }
 }

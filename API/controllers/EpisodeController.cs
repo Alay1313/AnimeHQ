@@ -49,6 +49,21 @@ public class EpisodeController : ControllerBase
         return updated == null ? NotFound() : Ok(updated);
     }
 
+
+    [HttpPost("anime/{animeId}/sync")]
+public async Task<IActionResult> SyncFromJikan(int animeId, CancellationToken ct = default)
+{
+    try
+    {
+        var result = await _service.SyncFromJikanAsync(animeId, ct);
+        return Ok(result);
+    }
+    catch (Exception ex)
+    {
+        return StatusCode(500, new { message = ex.Message });
+    }
+}
+
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id, CancellationToken ct = default)
     {

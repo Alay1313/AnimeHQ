@@ -6,6 +6,7 @@ namespace Persistence;
 public interface IGenreRepo
 {
     Task<Genre?> GetByIdAsync(int id, CancellationToken ct = default);
+    Task<List<int>> GetIdsByNamesAsync(List<string> names, CancellationToken ct = default);
     Task<IEnumerable<Genre>> GetAllAsync(CancellationToken ct = default);
     Task<Genre?> GetByNameAsync(string name, CancellationToken ct = default);
     Task<Genre> CreateAsync(Genre genre, CancellationToken ct = default);

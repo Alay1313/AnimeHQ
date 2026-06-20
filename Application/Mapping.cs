@@ -56,7 +56,7 @@ public class Mapping : Profile
         CreateMap<UpdateAnimeDto, Anime>()
             .ForMember(dest => dest.AnimeListId, opt => opt.Ignore()) 
             .ForMember(dest => dest.CachedAt, opt => opt.MapFrom(_ => DateTime.UtcNow))
-            .ForMember(dest => dest.AnimeGenres, opt => opt.Ignore()); // Crucial for your manual foreach loop 
+            .ForMember(dest => dest.AnimeGenres, opt => opt.Ignore()); 
 
 
 
@@ -110,12 +110,12 @@ public class Mapping : Profile
 
 
 
-            // Entity to DTO
+            
         CreateMap<Favorite, FavoriteDto>()
             .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User != null ? src.User.UserName : null))
             .ForMember(dest => dest.AnimeTitle, opt => opt.MapFrom(src => src.Anime != null ? src.Anime.Title : null));
 
-        // Create DTO to Entity
+        
         CreateMap<CreateFavoriteDto, Favorite>()
             .ForMember(dest => dest.Id, opt => opt.Ignore())
             .ForMember(dest => dest.CreatedAt, opt => opt.Ignore()) // Handled in Service
@@ -154,6 +154,50 @@ public class Mapping : Profile
             .ForMember(dest => dest.AirDate, opt => opt.MapFrom(src => src.Aired))
             .ForMember(dest => dest.Duration, opt => opt.MapFrom(src => src.Duration ?? string.Empty))
             .ForMember(dest => dest.Synopsis, opt => opt.MapFrom(src => string.Empty));
+
+
+
+        CreateMap<JikanMangaData, Manga>()
+        .ForMember(dest => dest.MangaId, opt => opt.MapFrom(src => src.MalId))
+        .ForMember(dest => dest.ImageURL, opt => opt.MapFrom(src =>
+        src.Images != null ? src.Images.Jpg.LargeImageUrl ?? src.Images.Jpg.ImageUrl : string.Empty))
+        .ForMember(dest => dest.Score, opt => opt.MapFrom(src => src.Score ?? 0))
+        .ForMember(dest => dest.Synopsis, opt => opt.MapFrom(src => src.Synopsis ?? string.Empty))
+        .ForMember(dest => dest.Type, opt => opt.MapFrom(src => src.Type ?? "Unknown"))
+        .ForMember(dest => dest.Chapters, opt => opt.MapFrom(src => src.Chapters ?? 0))
+        .ForMember(dest => dest.Volumes, opt => opt.MapFrom(src => src.Volumes ?? 0))
+        .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status ?? "Unknown"))
+        .ForMember(dest => dest.PublishedFrom, opt => opt.MapFrom(src => src.Published != null ? src.Published.From : default))
+        .ForMember(dest => dest.PublishedTo, opt => opt.MapFrom(src => src.Published != null ? src.Published.To : default))
+        .ForMember(dest => dest.Reviews, opt => opt.Ignore())
+        .ForMember(dest => dest.Favorites, opt => opt.Ignore());
+
+    CreateMap<Manga, MangaDto>();
+
+    CreateMap<CreateMangaFavoriteDto, MangaFavorite>();
+
+    CreateMap<MangaFavorite, MangaFavoriteDto>()
+        .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User != null ? src.User.UserName : null))
+        .ForMember(dest => dest.MangaTitle, opt => opt.MapFrom(src => src.Manga != null ? src.Manga.Title : null));
+
+    CreateMap<CreateMangaReviewDto, MangaReview>();
+
+    CreateMap<MangaReview, MangaReviewDto>()
+        .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User != null ? src.User.UserName : null))
+        .ForMember(dest => dest.MangaTitle, opt => opt.MapFrom(src => src.Manga != null ? src.Manga.Title : null));
+
+    CreateMap<JikanMangaData, MangaDto>()
+        .ForMember(dest => dest.MangaId, opt => opt.MapFrom(src => src.MalId))
+        .ForMember(dest => dest.ImageURL, opt => opt.MapFrom(src =>
+        src.Images != null ? src.Images.Jpg.LargeImageUrl ?? src.Images.Jpg.ImageUrl : string.Empty))
+        .ForMember(dest => dest.Score, opt => opt.MapFrom(src => src.Score ?? 0))
+        .ForMember(dest => dest.Synopsis, opt => opt.MapFrom(src => src.Synopsis ?? string.Empty))
+        .ForMember(dest => dest.Type, opt => opt.MapFrom(src => src.Type ?? "Unknown"))
+        .ForMember(dest => dest.Chapters, opt => opt.MapFrom(src => src.Chapters ?? 0))
+        .ForMember(dest => dest.Volumes, opt => opt.MapFrom(src => src.Volumes ?? 0))
+        .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status ?? "Unknown"))
+        .ForMember(dest => dest.PublishedFrom, opt => opt.MapFrom(src => src.Published != null ? src.Published.From : default))
+        .ForMember(dest => dest.PublishedTo, opt => opt.MapFrom(src => src.Published != null ? src.Published.To : default));
     }
 
  

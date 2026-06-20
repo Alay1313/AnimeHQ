@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { Navbar } from '@/components/layout/Navbar';
+import { Footer } from '@/components/layout/Footer';
 import { Login } from '@/pages/Login';
 import { Register } from '@/pages/Register';
 import { Home } from '@/pages/Home';
@@ -9,6 +10,10 @@ import { TopAiring } from '@/pages/TopAiring';
 import { Popular } from '@/pages/Popular';
 import { Seasonal } from '@/pages/Seasonal';
 import { Search } from '@/pages/Search';
+import { Manga } from '@/pages/Manga';
+import { MangaDetails } from '@/pages/MangaDetails';
+import { MyList } from '@/pages/MyList';
+import { Privacy } from '@/pages/Privacy';
 
 function App() {
   return (
@@ -25,8 +30,13 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/search" element={<Search />} />
+            <Route path="/manga" element={<Manga />} />
+            <Route path="/manga/:id" element={<MangaDetails />} />
+            <Route path="/my-list" element={<MyList />} />
+            <Route path="/privacy" element={<Privacy />} />
           </Routes>
         </main>
+        <Footer />
         <Toaster position="top-right" richColors />
       </div>
     </BrowserRouter>

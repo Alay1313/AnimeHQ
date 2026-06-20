@@ -24,6 +24,18 @@ public class GenreRepo : IGenreRepo
             .FirstOrDefaultAsync(g => g.Id == id, ct);
     }
 
+    // GenreRepo.cs — implementation
+    public async Task<List<int>> GetIdsByNamesAsync(List<string> names, CancellationToken ct = default)
+    {
+        if (names == null || names.Count == 0) return new List<int>();
+
+        var lowerNames = names.Select(n => n.ToLower()).ToList();
+        return await _context.Genres
+            .Where(g => lowerNames.Contains(g.Name.ToLower()))
+            .Select(g => g.Id)
+            .ToListAsync(ct);
+    }
+
     public async Task<IEnumerable<Genre>> GetAllAsync(CancellationToken ct = default)
     {
         return await _context.Genres

@@ -54,9 +54,9 @@ public class ReviewController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = created.ReviewId }, created);
     }
 
-    /// <summary>
-    /// Updates an existing review (only Content and Rating).
-    /// </summary>
+    
+    //Updates an existing review (only Content and Rating).
+    
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateReviewDto dto, CancellationToken ct = default)
     {
@@ -70,9 +70,8 @@ public class ReviewController : ControllerBase
             : Ok(updated);
     }
 
-    /// <summary>
-    /// Deletes a review by its ID.
-    /// </summary>
+    
+    //Deletes a review by its ID
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id, CancellationToken ct = default)
     {

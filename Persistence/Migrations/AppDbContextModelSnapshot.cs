@@ -24,20 +24,14 @@ namespace Persistence.Migrations
 
             modelBuilder.Entity("Domain.Anime", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("AnimeListId")
                         .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("AiredFrom")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime>("AiredTo")
                         .HasColumnType("datetime2");
-
-                    b.Property<int>("AnimeListId")
-                        .HasColumnType("int");
 
                     b.Property<DateTime>("CachedAt")
                         .HasColumnType("datetime2");
@@ -72,10 +66,7 @@ namespace Persistence.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.HasKey("Id");
-
-                    b.HasIndex("AnimeListId")
-                        .IsUnique();
+                    b.HasKey("AnimeListId");
 
                     b.ToTable("Anime");
                 });
@@ -148,9 +139,6 @@ namespace Persistence.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("GenreId")
-                        .HasColumnType("int");
-
                     b.Property<string>("UserId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
@@ -158,8 +146,6 @@ namespace Persistence.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AnimeId");
-
-                    b.HasIndex("GenreId");
 
                     b.HasIndex("UserId");
 
@@ -237,6 +223,119 @@ namespace Persistence.Migrations
                             Id = 10,
                             Name = "Supernatural"
                         });
+                });
+
+            modelBuilder.Entity("Domain.Manga", b =>
+                {
+                    b.Property<int>("MangaId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CachedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Chapters")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ImageURL")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime>("PublishedFrom")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("PublishedTo")
+                        .HasColumnType("datetime2");
+
+                    b.Property<float>("Score")
+                        .HasColumnType("real");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Synopsis")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int>("Volumes")
+                        .HasColumnType("int");
+
+                    b.HasKey("MangaId");
+
+                    b.ToTable("Manga");
+                });
+
+            modelBuilder.Entity("Domain.MangaFavorite", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("MangaId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MangaId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("MangaFavorites");
+                });
+
+            modelBuilder.Entity("Domain.MangaReview", b =>
+                {
+                    b.Property<int>("ReviewId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ReviewId"));
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("MangaId")
+                        .HasColumnType("int");
+
+                    b.Property<float>("Rating")
+                        .HasColumnType("real");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("ReviewId");
+
+                    b.HasIndex("MangaId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("MangaReviews");
                 });
 
             modelBuilder.Entity("Domain.Review", b =>
@@ -339,12 +438,6 @@ namespace Persistence.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Domain.Genre", "Genre")
-                        .WithMany()
-                        .HasForeignKey("GenreId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("Domain.User", "User")
                         .WithMany("Favorites")
                         .HasForeignKey("UserId")
@@ -353,7 +446,43 @@ namespace Persistence.Migrations
 
                     b.Navigation("Anime");
 
-                    b.Navigation("Genre");
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Domain.MangaFavorite", b =>
+                {
+                    b.HasOne("Domain.Manga", "Manga")
+                        .WithMany("Favorites")
+                        .HasForeignKey("MangaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Manga");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Domain.MangaReview", b =>
+                {
+                    b.HasOne("Domain.Manga", "Manga")
+                        .WithMany("Reviews")
+                        .HasForeignKey("MangaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Manga");
 
                     b.Navigation("User");
                 });
@@ -391,6 +520,13 @@ namespace Persistence.Migrations
             modelBuilder.Entity("Domain.Genre", b =>
                 {
                     b.Navigation("AnimeGenres");
+                });
+
+            modelBuilder.Entity("Domain.Manga", b =>
+                {
+                    b.Navigation("Favorites");
+
+                    b.Navigation("Reviews");
                 });
 
             modelBuilder.Entity("Domain.User", b =>

@@ -12,7 +12,7 @@ public interface IAnimeService
     Task<AnimeDto> GetByIdAsync(int animeListId, CancellationToken ct = default);
 
     // Searches for anime by title with pagination
-    Task<IEnumerable<AnimeDto>> SearchAsync(string query, int page = 1, int pageSize = 20, CancellationToken ct = default);
+    Task<IEnumerable<AnimeDto>> SearchAsync(string query, int page = 1, int pageSize = 20, List<int>? genreIds = null, CancellationToken ct = default);
 
     
     //Creates a new anime entry in the database
@@ -46,8 +46,8 @@ public interface IAnimeService
     Task<IEnumerable<AnimeDto>> GetSeasonalAsync(int page = 1, int pageSize = 25, string? type = null, CancellationToken ct = default);
 
 
-    /// <summary>
-    /// Retrieves upcoming anime directly from the Jikan API, optionally filtered by type.
-    /// </summary>
+   
+    // Retrieves upcoming anime directly from the Jikan API, optionally filtered by type.
+   
     Task<IEnumerable<AnimeDto>> GetUpcomingAsync(int page = 1, int pageSize = 25, string? type = null, CancellationToken ct = default);
 }

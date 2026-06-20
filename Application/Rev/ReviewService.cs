@@ -8,11 +8,13 @@ public class ReviewService : IReviewService
 {
     private readonly IReviewRepo _repo;
     private readonly IMapper _mapper;
+    private readonly IAnimeService _animeService;
 
-    public ReviewService(IReviewRepo repo, IMapper mapper)
+    public ReviewService(IReviewRepo repo, IMapper mapper, IAnimeService animeService)
     {
         _repo = repo;
         _mapper = mapper;
+        _animeService = animeService;
     }
 
     public async Task<ReviewDto?> GetByIdAsync(int id, CancellationToken ct = default)
@@ -33,14 +35,17 @@ public class ReviewService : IReviewService
         return _mapper.Map<IEnumerable<ReviewDto>>(reviews);
     }
 
-    public async Task<ReviewDto?> CreateAsync(CreateReviewDto dto, CancellationToken ct = default)
-    {
-        var entity = _mapper.Map<Review>(dto);
-        entity.CreatedAt = DateTime.UtcNow;
-        
-        var created = await _repo.CreateAsync(entity, ct);
-        return _mapper.Map<ReviewDto>(created);
-    }
+   public async Task<ReviewDto?> CreateAsync(CreateReviewDto dto, CancellationToken ct = default)
+{
+    // Ensure anime exists in DB before creating review
+    await _animeService.SyncFromJikanAsync(dto.AnimeId, ct);
+
+    var entity = _mapper.Map<Review>(dto);
+    entity.CreatedAt = DateTime.UtcNow;
+
+    var created = await _repo.CreateAsync(entity, ct);
+    return _mapper.Map<ReviewDto>(created);
+}
 
     public async Task<ReviewDto?> UpdateAsync(int id, UpdateReviewDto dto, CancellationToken ct = default)
     {

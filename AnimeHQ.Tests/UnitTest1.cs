@@ -1,4 +1,4 @@
-﻿namespace Test;
+﻿namespace AnimeHQ.Tests;
 
 public class UnitTest1
 {

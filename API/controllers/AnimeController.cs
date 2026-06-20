@@ -37,21 +37,21 @@ public class AnimeController : ControllerBase
     }
 
 
-    [HttpGet("search")]
+  [HttpGet("search")]
     public async Task<IActionResult> Search([FromQuery] string query, [FromQuery] int page = 1, [FromQuery] int pageSize = 20)
     {
-         try
-    {
-        var results = await _animeService.SearchAsync(query, page, pageSize);
-        return Ok(results);
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine("ERROR:");
-        Console.WriteLine(ex.ToString());
+        try
+        {
+            var results = await _animeService.SearchAsync(query, page, pageSize);
+            return Ok(results);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("ERROR:");
+            Console.WriteLine(ex.ToString());
 
-        return StatusCode(500, ex.ToString());
-    }
+            return StatusCode(500, ex.ToString());
+        }
     }
 
 

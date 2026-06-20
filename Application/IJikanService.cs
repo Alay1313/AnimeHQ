@@ -20,6 +20,11 @@ public interface IJikanService
     Task<IEnumerable<JikanAnimeData>> GetSeasonalAsync(int page = 1, int pageSize = 25, string? type = null, CancellationToken ct = default);
 
     Task<IEnumerable<JikanAnimeData>> GetUpcomingAsync(int page = 1, int pageSize = 25, string? type = null, CancellationToken ct = default);
+    
+    // IJikanService additions
+    Task<JikanMangaResponse?> GetMangaAsync(int malId);
+    Task<IEnumerable<JikanMangaData>> SearchMangaAsync(string query, int page = 1);
+    Task<IEnumerable<JikanMangaData>> GetTopMangaAsync(int page = 1, int pageSize = 25, CancellationToken ct = default);
 
 
 }
@@ -27,7 +32,7 @@ public interface IJikanService
 
 
 
-
+//DTos for jikan
 
 public class JikanApiResponse<T>
 {
@@ -121,12 +126,14 @@ public class JikanImages
      
     }
 
+public class JikanDateRange
+{
+    [JsonPropertyName("from")]
+    public DateTime? From { get; set; }
 
-    public class JikanDateRange
-    { 
-        public DateTime? From { get; set; }
-        public DateTime? To { get; set; }
-    }
+    [JsonPropertyName("to")]
+    public DateTime? To { get; set; }
+}
 
 
 
@@ -161,6 +168,66 @@ public class JikanImages
     public List<JikanGenre> Genres { get; set; } = [];
 }
 
+
+
+
+public class JikanMangaResponse
+{
+    public JikanMangaData? Data { get; set; }
+}
+
+
+public class JikanMangaData
+{
+    [JsonPropertyName("mal_id")]
+    public int MalId { get; set; }
+
+    [JsonPropertyName("title")]
+    public string Title { get; set; } = string.Empty;
+
+    [JsonPropertyName("images")]
+    public JikanImages? Images { get; set; }
+
+    [JsonPropertyName("score")]
+    public float? Score { get; set; }
+
+    [JsonPropertyName("synopsis")]
+    public string? Synopsis { get; set; }
+
+    [JsonPropertyName("type")]
+    public string? Type { get; set; }
+
+    [JsonPropertyName("chapters")]
+    public int? Chapters { get; set; }
+
+    [JsonPropertyName("volumes")]
+    public int? Volumes { get; set; }
+
+    [JsonPropertyName("status")]
+    public string? Status { get; set; }
+
+    [JsonPropertyName("published")]
+    public JikanDateRange? Published { get; set; }
+}
+
+public class JikanMangaApiResponse<T>
+{
+    public List<T>? Data { get; set; }
+}
+
+
+
+public class JikanAired
+{
+    [JsonPropertyName("from")]
+    public DateTime? From { get; set; }
+
+    [JsonPropertyName("to")]
+    public DateTime? To { get; set; }
+
+    [JsonPropertyName("string")]
+    public string? String { get; set; }
+}
 
    
 

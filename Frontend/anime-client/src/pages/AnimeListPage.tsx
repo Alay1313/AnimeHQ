@@ -4,46 +4,60 @@ import api from "@/lib/api";
 import { AnimeCard, type Anime } from "@/components/anime/AnimeCard";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 
 interface AnimeListPageProps {
   title: string;
   description: string;
-  endpoint: string; // e.g. "/anime/top-airing?page=1&pageSize=12"
+  endpoint: string;
 }
 
 export function AnimeListPage({ title, description, endpoint }: AnimeListPageProps) {
   const [animes, setAnimes] = useState<Anime[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [retryKey, setRetryKey] = useState(0);
+
+  const handleRetry = () => setRetryKey((k) => k + 1);
 
   useEffect(() => {
+    let ignore = false;
+
     const fetchAnimes = async () => {
       try {
         setIsLoading(true);
         setError(null);
         const response = await api.get<Anime[]>(endpoint);
-        setAnimes(response.data);
+        const unique = response.data.filter((anime, index, self) => index === self.findIndex((a) => a.animeListId === anime.animeListId));
+        if (!ignore) setAnimes(unique);
       } catch (err: unknown) {
-        if (axios.isAxiosError(err)) {
-          setError(err.response?.data?.message || "Failed to fetch anime.");
-        } else {
-          setError("An unexpected error occurred.");
+        if (!ignore) {
+          if (axios.isAxiosError(err)) {
+            setError(err.response?.data?.message || "Failed to fetch anime.");
+          } else {
+            setError("An unexpected error occurred.");
+          }
+          toast.error(`Failed to load ${title}`);
         }
-        toast.error(`Failed to load ${title}`);
       } finally {
-        setIsLoading(false);
+        if (!ignore) setIsLoading(false);
       }
     };
 
     fetchAnimes();
-  }, [endpoint]);
+    return () => { ignore = true; };
+  }, [endpoint, retryKey]);
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[50vh] text-center p-8 border rounded-lg bg-muted/50">
-        <h2 className="text-2xl font-bold text-destructive mb-2">Something went wrong.</h2>
+      <div className="flex flex-col items-center justify-center min-h-[50vh] text-center p-8 border rounded-lg bg-muted/50 space-y-4">
+        <h2 className="text-2xl font-bold text-destructive">Something went wrong.</h2>
         <p className="text-muted-foreground">{error}</p>
+        <Button onClick={handleRetry} variant="outline">
+          <RefreshCw className="mr-2 h-4 w-4" /> Retry
+        </Button>
       </div>
     );
   }
@@ -75,8 +89,13 @@ export function AnimeListPage({ title, description, endpoint }: AnimeListPagePro
       </div>
 
       {!isLoading && animes.length === 0 && (
-        <div className="text-center py-12 text-muted-foreground">
-          <p className="text-lg">No anime found.</p>
+        <div className="flex flex-col items-center justify-center py-16 text-center space-y-4">
+          <p className="text-lg text-muted-foreground">
+            Jikan API is temporarily unavailable. Please try again in a few minutes.
+          </p>
+          <Button onClick={handleRetry} variant="outline">
+            <RefreshCw className="mr-2 h-4 w-4" /> Retry
+          </Button>
         </div>
       )}
     </div>

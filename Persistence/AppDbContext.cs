@@ -14,81 +14,118 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Favorite> Favorites { get; set; }
     public DbSet<Genre> Genres { get; set; }
     public DbSet<AnimeGenre> AnimeGenres { get; set; }
+    public DbSet<Manga> Mangas { get; set; }
+    public DbSet<MangaFavorite> MangaFavorites { get; set; }
+    public DbSet<MangaReview> MangaReviews { get; set; }
 
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+   protected override void OnModelCreating(ModelBuilder modelBuilder)
+{
+    base.OnModelCreating(modelBuilder);
+
+    // 1. Genre Configurations
+    modelBuilder.Entity<Genre>().HasIndex(g => g.Name).IsUnique();
+    
+    modelBuilder.Entity<Genre>().HasData(
+        new Genre { Id = 1, Name = "Action" },
+        new Genre { Id = 2, Name = "Adventure" },
+        new Genre { Id = 3, Name = "Comedy" },
+        new Genre { Id = 4, Name = "Drama" },
+        new Genre { Id = 5, Name = "Fantasy" },
+        new Genre { Id = 6, Name = "Mystery" },
+        new Genre { Id = 7, Name = "Horror" },
+        new Genre { Id = 8, Name = "Thriller" },
+        new Genre { Id = 9, Name = "Romance" },
+        new Genre { Id = 10, Name = "Supernatural" }
+    );
+
+    // 2. AnimeGenre (Join Table) Configurations
+    modelBuilder.Entity<AnimeGenre>(entity =>
     {
-        base.OnModelCreating(modelBuilder);
+        entity.HasKey(e => new { e.AnimeId, e.GenreId });
 
-        // 1. Anime Configurations
-        modelBuilder.Entity<Anime>().HasIndex(a => a.AnimeListId).IsUnique();
+        entity.HasOne(ag => ag.Anime)
+              .WithMany(a => a.AnimeGenres)
+              .HasForeignKey(ag => ag.AnimeId)
+              .OnDelete(DeleteBehavior.Cascade);
 
-        // 2. Genre Configurations
-        modelBuilder.Entity<Genre>().HasIndex(g => g.Name).IsUnique();
-        
-        modelBuilder.Entity<Genre>().HasData(
-            new Genre { Id = 1, Name = "Action" },
-            new Genre { Id = 2, Name = "Adventure" },
-            new Genre { Id = 3, Name = "Comedy" },
-            new Genre { Id = 4, Name = "Drama" },
-            new Genre { Id = 5, Name = "Fantasy" },
-            new Genre { Id = 6, Name = "Mystery" },
-            new Genre { Id = 7, Name = "Horror" },
-            new Genre { Id = 8, Name = "Thriller" },
-            new Genre { Id = 9, Name = "Romance" },
-            new Genre { Id = 10, Name = "Supernatural" }
-        );
+        entity.HasOne(ag => ag.Genre)
+              .WithMany(g => g.AnimeGenres)
+              .HasForeignKey(ag => ag.GenreId)
+              .OnDelete(DeleteBehavior.Cascade);
+    });
 
-        // 3. AnimeGenre (Join Table) Configurations
-        modelBuilder.Entity<AnimeGenre>(entity =>
-        {
-            entity.HasKey(e => new { e.AnimeId, e.GenreId });
+    // 3. Episode Configurations
+    modelBuilder.Entity<Episode>(entity =>
+    {
+        entity.HasOne(e => e.Anime)
+              .WithMany(a => a.EpisodesList)
+              .HasForeignKey(e => e.AnimeId)
+              .OnDelete(DeleteBehavior.Cascade);
+    });
 
-            entity.HasOne(ag => ag.Anime)
-                  .WithMany(a => a.AnimeGenres)
-                  .HasForeignKey(ag => ag.AnimeId)
-                  .OnDelete(DeleteBehavior.Cascade); // If Anime is deleted, remove its genre links
+    // 4. Review Configurations
+    modelBuilder.Entity<Review>(entity =>
+    {
+        entity.HasOne(r => r.User)
+              .WithMany(u => u.Reviews)
+              .HasForeignKey(r => r.UserId)
+              .OnDelete(DeleteBehavior.Cascade);
 
-            entity.HasOne(ag => ag.Genre)
-                  .WithMany(g => g.AnimeGenres)
-                  .HasForeignKey(ag => ag.GenreId)
-                  .OnDelete(DeleteBehavior.Cascade); // If Genre is deleted, remove its anime links
-        });
+        entity.HasOne(r => r.Anime)
+              .WithMany(a => a.Reviews)
+              .HasForeignKey(r => r.AnimeId)
+              .OnDelete(DeleteBehavior.Cascade);
+    });
 
-        // 4. Episode Configurations
-        modelBuilder.Entity<Episode>(entity =>
-        {
-            entity.HasOne(e => e.Anime)
-                  .WithMany(a => a.EpisodesList) // Ensure Anime has: public ICollection<Episode> EpisodesList { get; set; }
-                  .HasForeignKey(e => e.AnimeId)
-                  .OnDelete(DeleteBehavior.Cascade);
-        });
+    // 5. Favorite Configurations
+    modelBuilder.Entity<Favorite>(entity =>
+    {
+        entity.HasOne(f => f.User)
+              .WithMany(u => u.Favorites)
+              .HasForeignKey(f => f.UserId)
+              .OnDelete(DeleteBehavior.Cascade);
 
-        // 5. Review Configurations
-        modelBuilder.Entity<Review>(entity =>
-        {
-            entity.HasOne(r => r.User)
-                  .WithMany(u => u.Reviews) // Ensure User has: public ICollection<Review> Reviews { get; set; }
-                  .HasForeignKey(r => r.UserId)
-                  .OnDelete(DeleteBehavior.Cascade);
+        entity.HasOne(f => f.Anime)
+              .WithMany(a => a.FavoriteBy)
+              .HasForeignKey(f => f.AnimeId)
+              .OnDelete(DeleteBehavior.Cascade);
+    });
 
-            entity.HasOne(r => r.Anime)
-                  .WithMany(a => a.Reviews) // Ensure Anime has: public ICollection<Review> Reviews { get; set; }
-                  .HasForeignKey(r => r.AnimeId)
-                  .OnDelete(DeleteBehavior.Cascade);
-        });
 
-        // 6. Favorite Configurations
-        modelBuilder.Entity<Favorite>(entity =>
-        {
-            entity.HasOne(f => f.User)
-                  .WithMany(u => u.Favorites) // Ensure User has: public ICollection<Favorite> Favorites { get; set; }
-                  .HasForeignKey(f => f.UserId)
-                  .OnDelete(DeleteBehavior.Cascade);
 
-            entity.HasOne(f => f.Anime)
-                  .WithMany(a => a.FavoriteBy) // Changed from 'FavoriteBy' to 'Favorites' for consistency
-                  .HasForeignKey(f => f.AnimeId)
-                  .OnDelete(DeleteBehavior.Cascade);
-        });
-    }
+    modelBuilder.Entity<MangaFavorite>(entity =>
+    {
+        entity.HasOne(f => f.User)
+              .WithMany()
+              .HasForeignKey(f => f.UserId)
+              .OnDelete(DeleteBehavior.Cascade);
+
+        entity.HasOne(f => f.Manga)
+              .WithMany(m => m.Favorites)
+              .HasForeignKey(f => f.MangaId)
+              .OnDelete(DeleteBehavior.Cascade);
+    });
+
+    modelBuilder.Entity<MangaReview>(entity =>
+    {
+        entity.HasOne(r => r.User)
+              .WithMany()
+              .HasForeignKey(r => r.UserId)
+              .OnDelete(DeleteBehavior.Cascade);
+
+        entity.HasOne(r => r.Manga)
+              .WithMany(m => m.Reviews)
+              .HasForeignKey(r => r.MangaId)
+              .OnDelete(DeleteBehavior.Cascade);
+    });
+
+
+      modelBuilder.Entity<Anime>()
+            .Property(a => a.AnimeListId)
+            .ValueGeneratedNever();
+
+      modelBuilder.Entity<Manga>()
+            .Property(m => m.MangaId)
+            .ValueGeneratedNever();
+}
 }

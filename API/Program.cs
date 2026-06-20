@@ -20,12 +20,13 @@ builder.Services.AddAutoMapper(typeof(Mapping));
 builder.Services.AddHttpClient<IJikanService, JikanService>(client =>
 {
     client.BaseAddress = new Uri("https://api.jikan.moe/v4/");
+    client.Timeout = TimeSpan.FromSeconds(10);
     client.DefaultRequestHeaders.Add("User-Agent", "AnimeTrackerApp/1.0");
 });
 
 
 builder.Services.AddCors(options => options.AddPolicy("AllowFrontend", 
-    policy => policy.WithOrigins("http://localhost:5173").AllowAnyHeader().AllowAnyMethod().AllowCredentials()
+    policy => policy.WithOrigins("http://localhost:5173", "https://your-vercel-app.vercel.app").AllowAnyHeader().AllowAnyMethod().AllowCredentials()
 
 ));
 
@@ -48,6 +49,11 @@ builder.Services.AddScoped<IFavoriteService, FavoriteService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IGenreService, GenreService>();
+
+builder.Services.AddScoped<IMangaRepo, MangaRepo>();
+builder.Services.AddScoped<IMangaFavoriteRepo, MangaFavoriteRepo>();
+builder.Services.AddScoped<IMangaReviewRepo, MangaReviewRepo>();
+builder.Services.AddScoped<IMangaService, MangaService>();
 
 
 builder.Services.AddAuthentication(options =>
@@ -74,6 +80,7 @@ builder.Services.AddAuthorization();
 
 
 builder.Services.AddControllers();
+builder.Services.AddMemoryCache();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 

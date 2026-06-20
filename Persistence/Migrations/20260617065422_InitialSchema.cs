@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class init : Migration
+    public partial class InitialSchema : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -17,12 +17,10 @@ namespace Persistence.Migrations
                 name: "Anime",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
                     AnimeListId = table.Column<int>(type: "int", nullable: false),
                     Title = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
                     ImageURL = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
-                    Score = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Score = table.Column<float>(type: "real", nullable: false),
                     Synopsis = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Type = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Episodes = table.Column<int>(type: "int", nullable: false),
@@ -33,7 +31,7 @@ namespace Persistence.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Anime", x => x.Id);
+                    table.PrimaryKey("PK_Anime", x => x.AnimeListId);
                 });
 
             migrationBuilder.CreateTable(
@@ -50,12 +48,35 @@ namespace Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Manga",
+                columns: table => new
+                {
+                    MangaId = table.Column<int>(type: "int", nullable: false),
+                    Title = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    ImageURL = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    Score = table.Column<float>(type: "real", nullable: false),
+                    Synopsis = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Type = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Chapters = table.Column<int>(type: "int", nullable: false),
+                    Volumes = table.Column<int>(type: "int", nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    PublishedFrom = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    PublishedTo = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CachedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Manga", x => x.MangaId);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: false),
                     UserName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Email = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
+                    PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
@@ -73,7 +94,8 @@ namespace Persistence.Migrations
                     Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Synopsis = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     AirDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Duration = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Duration = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    EpisodeNumber = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -82,7 +104,7 @@ namespace Persistence.Migrations
                         name: "FK_Episodes_Anime_AnimeId",
                         column: x => x.AnimeId,
                         principalTable: "Anime",
-                        principalColumn: "Id",
+                        principalColumn: "AnimeListId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -100,7 +122,7 @@ namespace Persistence.Migrations
                         name: "FK_AnimeGenres_Anime_AnimeId",
                         column: x => x.AnimeId,
                         principalTable: "Anime",
-                        principalColumn: "Id",
+                        principalColumn: "AnimeListId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_AnimeGenres_Genres_GenreId",
@@ -117,8 +139,8 @@ namespace Persistence.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    GenreId = table.Column<int>(type: "int", nullable: false),
-                    AnimeId = table.Column<int>(type: "int", nullable: false)
+                    AnimeId = table.Column<int>(type: "int", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -127,7 +149,7 @@ namespace Persistence.Migrations
                         name: "FK_Favorites_Anime_AnimeId",
                         column: x => x.AnimeId,
                         principalTable: "Anime",
-                        principalColumn: "Id",
+                        principalColumn: "AnimeListId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Favorites_Users_UserId",
@@ -138,25 +160,81 @@ namespace Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Reviews",
+                name: "MangaFavorites",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    AnimeId = table.Column<int>(type: "int", nullable: false),
-                    Rating = table.Column<int>(type: "int", nullable: false),
-                    Comment = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    MangaId = table.Column<int>(type: "int", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Reviews", x => x.Id);
+                    table.PrimaryKey("PK_MangaFavorites", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_MangaFavorites_Manga_MangaId",
+                        column: x => x.MangaId,
+                        principalTable: "Manga",
+                        principalColumn: "MangaId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_MangaFavorites_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "MangaReviews",
+                columns: table => new
+                {
+                    ReviewId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    MangaId = table.Column<int>(type: "int", nullable: false),
+                    Content = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Rating = table.Column<float>(type: "real", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MangaReviews", x => x.ReviewId);
+                    table.ForeignKey(
+                        name: "FK_MangaReviews_Manga_MangaId",
+                        column: x => x.MangaId,
+                        principalTable: "Manga",
+                        principalColumn: "MangaId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_MangaReviews_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Reviews",
+                columns: table => new
+                {
+                    ReviewId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    AnimeId = table.Column<int>(type: "int", nullable: false),
+                    Content = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Rating = table.Column<float>(type: "real", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Reviews", x => x.ReviewId);
                     table.ForeignKey(
                         name: "FK_Reviews_Anime_AnimeId",
                         column: x => x.AnimeId,
                         principalTable: "Anime",
-                        principalColumn: "Id",
+                        principalColumn: "AnimeListId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Reviews_Users_UserId",
@@ -182,12 +260,6 @@ namespace Persistence.Migrations
                     { 9, "Romance" },
                     { 10, "Supernatural" }
                 });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Anime_AnimeListId",
-                table: "Anime",
-                column: "AnimeListId",
-                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_AnimeGenres_GenreId",
@@ -216,6 +288,26 @@ namespace Persistence.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_MangaFavorites_MangaId",
+                table: "MangaFavorites",
+                column: "MangaId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MangaFavorites_UserId",
+                table: "MangaFavorites",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MangaReviews_MangaId",
+                table: "MangaReviews",
+                column: "MangaId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MangaReviews_UserId",
+                table: "MangaReviews",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Reviews_AnimeId",
                 table: "Reviews",
                 column: "AnimeId");
@@ -239,10 +331,19 @@ namespace Persistence.Migrations
                 name: "Favorites");
 
             migrationBuilder.DropTable(
+                name: "MangaFavorites");
+
+            migrationBuilder.DropTable(
+                name: "MangaReviews");
+
+            migrationBuilder.DropTable(
                 name: "Reviews");
 
             migrationBuilder.DropTable(
                 name: "Genres");
+
+            migrationBuilder.DropTable(
+                name: "Manga");
 
             migrationBuilder.DropTable(
                 name: "Anime");

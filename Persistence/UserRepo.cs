@@ -10,7 +10,7 @@ public class UserRepo : IUserRepo
 {
     private readonly AppDbContext _context;
 
-    // Standard DI constructor
+    
     public UserRepo(AppDbContext context)
     {
         _context = context;
