@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Dev\\AnimeHQ\\Domain\\Domain.csproj": {}
+    "c:\\Dev\\AnimeHQ\\Domain\\Domain.csproj": {}
   },
   "projects": {
-    "C:\\Dev\\AnimeHQ\\Domain\\Domain.csproj": {
+    "c:\\Dev\\AnimeHQ\\Domain\\Domain.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Dev\\AnimeHQ\\Domain\\Domain.csproj",
+        "projectUniqueName": "c:\\Dev\\AnimeHQ\\Domain\\Domain.csproj",
         "projectName": "Domain",
-        "projectPath": "C:\\Dev\\AnimeHQ\\Domain\\Domain.csproj",
+        "projectPath": "c:\\Dev\\AnimeHQ\\Domain\\Domain.csproj",
         "packagesPath": "C:\\Users\\nyanr\\.nuget\\packages\\",
-        "outputPath": "C:\\Dev\\AnimeHQ\\Domain\\obj\\",
+        "outputPath": "c:\\Dev\\AnimeHQ\\Domain\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\nyanr\\AppData\\Roaming\\NuGet\\NuGet.Config"

@@ -2507,11 +2507,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Dev\\AnimeHQ\\Test\\Test.csproj",
+      "projectUniqueName": "c:\\Dev\\AnimeHQ\\Test\\Test.csproj",
       "projectName": "Test",
-      "projectPath": "C:\\Dev\\AnimeHQ\\Test\\Test.csproj",
+      "projectPath": "c:\\Dev\\AnimeHQ\\Test\\Test.csproj",
       "packagesPath": "C:\\Users\\nyanr\\.nuget\\packages\\",
-      "outputPath": "C:\\Dev\\AnimeHQ\\Test\\obj\\",
+      "outputPath": "c:\\Dev\\AnimeHQ\\Test\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\nyanr\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -2526,11 +2526,11 @@
         "net10.0": {
           "targetAlias": "net10.0",
           "projectReferences": {
-            "C:\\Dev\\AnimeHQ\\Application\\Application.csproj": {
-              "projectPath": "C:\\Dev\\AnimeHQ\\Application\\Application.csproj"
+            "c:\\Dev\\AnimeHQ\\Application\\Application.csproj": {
+              "projectPath": "c:\\Dev\\AnimeHQ\\Application\\Application.csproj"
             },
-            "C:\\Dev\\AnimeHQ\\Domain\\Domain.csproj": {
-              "projectPath": "C:\\Dev\\AnimeHQ\\Domain\\Domain.csproj"
+            "c:\\Dev\\AnimeHQ\\Domain\\Domain.csproj": {
+              "projectPath": "c:\\Dev\\AnimeHQ\\Domain\\Domain.csproj"
             }
           }
         }
